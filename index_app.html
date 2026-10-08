@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>매일 그림책 작업실</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- Google Fonts: Gowun Batang & Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            warmBg: '#fcfaf6',
+            warmPaper: '#f4efe6',
+            warmPrimary: '#8c6d58',
+            warmPrimaryDark: '#6b513e',
+            warmAccent: '#d97736',
+            warmMuted: '#e8ded2',
+          },
+          fontFamily: {
+            batang: ['"Gowun Batang"', 'serif'],
+            sans: ['"Noto Sans KR"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #fcfaf6;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #332d29;
+    }
+    .font-batang {
+      font-family: 'Gowun Batang', serif;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .img-aspect {
+      aspect-ratio: 3/4;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-warmMuted selection:text-warmPrimaryDark">
+
+  <!-- Admin Active Banner (Visible when logged in) -->
+  <div id="adminBanner" class="hidden bg-amber-800 text-amber-50 px-4 py-2.5 shadow-md border-b border-amber-900 flex flex-wrap justify-between items-center text-sm sticky top-0 z-50">
+    <div class="flex items-center gap-2 font-medium">
+      <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <i class="fa-solid fa-user-shield"></i>
+      <span>관리자 모드로 접속 중입니다 (비밀번호: 0000)</span>
+    </div>
+    <div class="flex items-center gap-3 mt-2 sm:mt-0">
+      <button onclick="openBookModal()" class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-1 rounded-md transition text-xs font-semibold flex items-center gap-1 shadow-sm">
+        <i class="fa-solid fa-plus"></i> 새 그림책 등록
+      </button>
+      <button onclick="logoutAdmin()" class="bg-amber-950 hover:bg-black text-amber-200 px-3 py-1 rounded-md transition text-xs font-medium">
+        로그아웃
+      </button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-warmBg border-b border-warmMuted sticky top-0 z-40 bg-opacity-95 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <!-- Logo -->
+      <a href="#" onclick="filterCategory('all'); return false;" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-full bg-warmPrimary text-amber-50 flex items-center justify-center shadow-md group-hover:bg-warmAccent transition-colors">
+          <i class="fa-solid fa-book-open text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold font-batang tracking-tight text-warmPrimaryDark group-hover:text-warmAccent transition-colors">
+            매일 그림책 작업실
+          </h1>
+          <p class="text-xs text-stone-500 font-light">마음을 다독이는 그림책 이야기 공간</p>
+        </div>
+      </a>
+
+      <!-- Search & Main Menu -->
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="relative flex-1 md:w-64">
+          <input 
+            type="text" 
+            id="searchInput" 
+            oninput="handleSearch()"
+            placeholder="제목, 작가, 키워드 검색..." 
+            class="w-full pl-9 pr-4 py-2 text-sm bg-warmPaper border border-stone-300 rounded-full focus:outline-none focus:ring-2 focus:ring-warmPrimary focus:border-transparent transition"
+          />
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-stone-400 text-sm"></i>
+        </div>
+        <a href="#contact-section" class="text-xs sm:text-sm font-medium text-warmPrimaryDark hover:text-warmAccent px-3 py-2 rounded-lg hover:bg-warmPaper transition whitespace-nowrap">
+          <i class="fa-regular fa-envelope mr-1"></i>문의하기
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-b from-warmPaper to-warmBg py-10 px-4 border-b border-warmMuted">
+    <div class="max-w-4xl mx-auto text-center space-y-4">
+      <span class="inline-block bg-amber-100 text-warmPrimaryDark text-xs font-semibold px-3 py-1 rounded-full border border-amber-200">
+        🎨 따뜻한 그림과 글이 머무는 곳
+      </span>
+      <h2 id="heroTitle" class="text-3xl sm:text-4xl font-bold font-batang text-stone-800 leading-tight">
+        오늘 당신의 마음에 스며들 그림책 한 권
+      </h2>
+      <p id="heroSubtitle" class="text-stone-600 text-sm sm:text-base max-w-2xl mx-auto font-light leading-relaxed">
+        어린이의 호기심부터 어른의 위로까지, 아름다운 연출과 서사가 담긴 그림책들을 모아 소개합니다. 언제든 머물며 당신만의 따스한 순간을 찾아보세요.
+      </p>
+
+      <!-- Category Filter Tabs -->
+      <div id="categoryContainer" class="flex items-center justify-center gap-2 pt-4 flex-wrap">
+        <!-- Dynamic Category Buttons -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-10">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold font-batang text-stone-800 flex items-center gap-2">
+        <i class="fa-solid fa-layer-group text-warmAccent text-base"></i>
+        <span id="currentCategoryTitle">전체 그림책 서가</span>
+        <span id="bookCountBadge" class="text-xs bg-stone-200 text-stone-600 px-2.5 py-0.5 rounded-full font-normal">0권</span>
+      </h3>
+
+      <div class="text-xs text-stone-500">
+        <i class="fa-solid fa-sort mr-1"></i>최신순 등록
+      </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <!-- Book Cards generated dynamically -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16 bg-warmPaper/50 rounded-2xl border border-dashed border-stone-300">
+      <i class="fa-solid fa-book-open-reader text-4xl text-stone-300 mb-3 block"></i>
+      <p class="text-stone-600 font-medium">검색된 그림책이 없습니다.</p>
+      <p class="text-xs text-stone-400 mt-1">다른 키워드로 검색하거나 카테고리를 변경해 보세요.</p>
+    </div>
+  </section>
+
+  <!-- Info & Intro Section -->
+  <section class="bg-warmPaper py-12 border-t border-b border-warmMuted my-8">
+    <div class="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white/80 p-6 rounded-xl shadow-sm border border-stone-200/80 hover:shadow-md transition">
+        <div class="w-10 h-10 rounded-lg bg-amber-100 text-warmAccent flex items-center justify-center mb-3">
+          <i class="fa-solid fa-palette text-lg"></i>
+        </div>
+        <h4 class="font-bold text-stone-800 font-batang mb-1">그림책 수집과 기록</h4>
+        <p class="text-xs text-stone-600 leading-relaxed">
+          매일 작업실에서 엄선하여 소개해 드리는 그림책 컬렉션입니다. 그림의 구도와 색채, 이야기가 주는 감동을 선별해 정리합니다.
+        </p>
+      </div>
+
+      <div class="bg-white/80 p-6 rounded-xl shadow-sm border border-stone-200/80 hover:shadow-md transition">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
+          <i class="fa-solid fa-pen-nib text-lg"></i>
+        </div>
+        <h4 class="font-bold text-stone-800 font-batang mb-1">작가와 원화 탐구</h4>
+        <p class="text-xs text-stone-600 leading-relaxed">
+          국내외 유명 작가부터 떠오르는 신진 작가의 독창적인 화풍 및 기법을 함께 살펴볼 수 있는 공간을 지향합니다.
+        </p>
+      </div>
+
+      <div class="bg-white/80 p-6 rounded-xl shadow-sm border border-stone-200/80 hover:shadow-md transition">
+        <div class="w-10 h-10 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center mb-3">
+          <i class="fa-solid fa-comments text-lg"></i>
+        </div>
+        <h4 class="font-bold text-stone-800 font-batang mb-1">소통과 제휴 문의</h4>
+        <p class="text-xs text-stone-600 leading-relaxed">
+          그림책 추천 요청, 작업실 제휴, 원화 전시 및 북토크 관련 문의는 언제든 이메일로 편하게 남겨주세요.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact-section" class="max-w-4xl mx-auto px-4 py-10 my-4">
+    <div class="bg-stone-900 text-stone-100 rounded-2xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
+      <!-- Background Decorative Circle -->
+      <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-warmAccent/20 rounded-full filter blur-2xl"></div>
+
+      <div class="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        <div class="md:col-span-7 space-y-3">
+          <span class="text-warmAccent text-xs font-semibold tracking-widest uppercase">Contact Us</span>
+          <h3 class="text-2xl sm:text-3xl font-bold font-batang text-white">
+            작업실에 전하고 싶은 메시지가 있으신가요?
+          </h3>
+          <p class="text-stone-300 text-xs sm:text-sm font-light leading-relaxed">
+            그림책에 관한 제안, 피드백, 도서 추천 및 제휴 관련 문의 사항은 공식 이메일로 연락주시면 정성껏 답변드리겠습니다.
+          </p>
+          <div class="pt-2 flex items-center gap-2 text-stone-200 font-mono text-sm">
+            <i class="fa-regular fa-envelope text-warmAccent"></i>
+            <span>fishcat6@naver.com</span>
+          </div>
+        </div>
+
+        <div class="md:col-span-5 bg-stone-800/90 p-5 rounded-xl border border-stone-700 space-y-3">
+          <a href="mailto:fishcat6@naver.com" class="block w-full py-3 px-4 bg-warmAccent hover:bg-orange-600 text-white font-medium text-center rounded-lg shadow transition text-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            이메일 보내기
+          </a>
+          <button onclick="copyToClipboard('fishcat6@naver.com')" class="w-full py-2.5 px-4 bg-stone-700 hover:bg-stone-600 text-stone-200 text-xs font-medium rounded-lg transition border border-stone-600 flex items-center justify-center gap-2">
+            <i class="fa-regular fa-copy"></i>
+            이메일 주소 복사하기
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-warmPaper border-t border-warmMuted mt-auto py-8 text-stone-600 text-xs">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="text-center sm:text-left space-y-1">
+        <p class="font-bold font-batang text-stone-800 text-sm">매일 그림책 작업실</p>
+        <p class="text-stone-500">문의: fishcat6@naver.com | 서울 및 온라인 그림책 컬렉션</p>
+        <p class="text-stone-400">© 2026 Daily Picture Book Studio. All rights reserved.</p>
+      </div>
+
+      <!-- Secret / Discrete Admin Trigger Button -->
+      <div class="flex items-center gap-3">
+        <span class="text-stone-400">|</span>
+        <button 
+          onclick="toggleAdminAccess()" 
+          class="text-stone-400 hover:text-stone-600 hover:underline transition flex items-center gap-1 opacity-70 hover:opacity-100 text-[11px]"
+          title="관리자 접속"
+        >
+          <i class="fa-solid fa-lock text-[10px]"></i>
+          <span>관리자 접속</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- 1. Detail View Modal -->
+  <div id="detailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-warmBg rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl border border-stone-200 my-8 max-h-[90vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-6 bg-warmPaper border-b border-warmMuted flex justify-between items-center sticky top-0 z-10">
+        <span id="modalCategory" class="text-xs bg-amber-200 text-amber-900 px-2.5 py-1 rounded-full font-medium">카테고리</span>
+        <button onclick="closeDetailModal()" class="text-stone-400 hover:text-stone-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-stone-200 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-5 gap-6 items-start">
+          <!-- Cover Image -->
+          <div class="sm:col-span-2 relative group rounded-xl overflow-hidden shadow-md border border-stone-200 bg-stone-100">
+            <img id="modalCover" src="" alt="Book Cover" class="w-full h-auto object-cover" onerror="this.src='https://placehold.co/400x530/f4efe6/8c6d58?text=Image+Not+Found'"/>
+          </div>
+
+          <!-- Metadata -->
+          <div class="sm:col-span-3 space-y-4">
+            <div>
+              <h3 id="modalTitle" class="text-2xl font-bold font-batang text-stone-900 leading-snug">도서 제목</h3>
+              <p id="modalAuthor" class="text-sm text-warmAccent font-medium mt-1">글 / 그림 작가</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 py-3 px-4 bg-stone-100 rounded-xl text-xs text-stone-600">
+              <div><span class="text-stone-400">권장 연령:</span> <span id="modalAge" class="font-medium text-stone-800">전연령</span></div>
+              <div><span class="text-stone-400">출판사:</span> <span id="modalPublisher" class="font-medium text-stone-800">작업실 출판</span></div>
+              <div class="col-span-2"><span class="text-stone-400">키워드:</span> <span id="modalTags" class="font-medium text-stone-800">#그림책</span></div>
+            </div>
+
+            <div class="space-y-2">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-stone-400">작업실 도서 요약</h4>
+              <p id="modalSummary" class="text-sm text-stone-700 leading-relaxed bg-warmPaper/70 p-3 rounded-lg border border-warmMuted italic">
+                요약 내용
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full Story / Review -->
+        <div class="space-y-3 pt-4 border-t border-stone-200">
+          <h4 class="text-base font-bold font-batang text-stone-800 flex items-center gap-2">
+            <i class="fa-solid fa-quote-left text-warmAccent text-sm"></i> 그림책 이야기 & 감상
+          </h4>
+          <div id="modalDescription" class="text-sm text-stone-700 leading-relaxed whitespace-pre-line space-y-2">
+            상세 설명 내용이 들어갑니다.
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-warmPaper border-t border-warmMuted flex justify-between items-center text-xs">
+        <span class="text-stone-500"><i class="fa-solid fa-heart text-rose-500 mr-1"></i> 추천 도서</span>
+        <button onclick="closeDetailModal()" class="px-4 py-2 bg-stone-800 text-stone-100 rounded-lg hover:bg-black transition font-medium">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Admin Auth Password Modal -->
+  <div id="adminAuthModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-200 text-center space-y-4">
+      <div class="w-12 h-12 rounded-full bg-amber-100 text-warmPrimaryDark flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold font-batang text-stone-800">관리자 접속 비밀번호 입력</h3>
+        <p class="text-xs text-stone-500 mt-1">관리자 기능 사용을 위한 비밀번호를 입력해주세요.</p>
+      </div>
+
+      <div class="space-y-3">
+        <input 
+          type="password" 
+          id="adminPasswordInput" 
+          placeholder="비밀번호 4자리" 
+          maxlength="8"
+          onkeydown="if(event.key==='Enter') submitAdminAuth()"
+          class="w-full text-center tracking-widest text-lg py-2 bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none"
+        />
+        <p id="adminAuthError" class="text-xs text-rose-600 font-medium hidden">
+          비밀번호가 올바르지 않습니다. (기본: 0000)
+        </p>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeAdminAuthModal()" class="flex-1 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg text-xs font-medium transition">
+          취소
+        </button>
+        <button onclick="submitAdminAuth()" class="flex-1 py-2 bg-warmPrimary hover:bg-warmPrimaryDark text-white rounded-lg text-xs font-medium transition shadow">
+          확인
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Add/Edit Picture Book Modal -->
+  <div id="bookModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl border border-stone-200 my-6 max-h-[90vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 bg-stone-900 text-white flex justify-between items-center">
+        <h3 id="bookModalTitle" class="text-lg font-bold font-batang flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-warmAccent"></i> 그림책 직접 등록 / 수정
+        </h3>
+        <button onclick="closeBookModal()" class="text-stone-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <form id="bookForm" onsubmit="handleBookSubmit(event)" class="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
+        <input type="hidden" id="editBookId" value="" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Title -->
+          <div class="space-y-1">
+            <label class="block font-medium text-stone-700">그림책 제목 <span class="text-rose-500">*</span></label>
+            <input type="text" id="formTitle" required placeholder="예: 구름빵" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none"/>
+          </div>
+
+          <!-- Author -->
+          <div class="space-y-1">
+            <label class="block font-medium text-stone-700">작가 (글/그림) <span class="text-rose-500">*</span></label>
+            <input type="text" id="formAuthor" required placeholder="예: 백희나 작가" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Category -->
+          <div class="space-y-1">
+            <label class="block font-medium text-stone-700">카테고리 <span class="text-rose-500">*</span></label>
+            <select id="formCategory" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none bg-white">
+              <option value="추천 그림책">추천 그림책</option>
+              <option value="유아/어린이">유아/어린이</option>
+              <option value="어른을 위한 그림책">어른을 위한 그림책</option>
+              <option value="자연/동물">자연/동물</option>
+              <option value="창작/상상">창작/상상</option>
+            </select>
+          </div>
+
+          <!-- Target Age -->
+          <div class="space-y-1">
+            <label class="block font-medium text-stone-700">권장 연령</label>
+            <input type="text" id="formAge" placeholder="예: 4~7세 / 전연령" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none"/>
+          </div>
+
+          <!-- Publisher -->
+          <div class="space-y-1">
+            <label class="block font-medium text-stone-700">출판사</label>
+            <input type="text" id="formPublisher" placeholder="예: 책읽는곰" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none"/>
+          </div>
+        </div>
+
+        <!-- Image Upload Option (File or URL) -->
+        <div class="space-y-2 p-3 bg-stone-50 rounded-xl border border-stone-200">
+          <label class="block font-medium text-stone-800">그림책 표지 이미지 등록</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- File Upload -->
+            <div>
+              <span class="text-xs text-stone-500 block mb-1">📷 내 컴퓨터에서 사진 올리기:</span>
+              <input type="file" id="formImageFile" accept="image/*" onchange="handleFileSelect(event)" class="w-full text-xs text-stone-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-warmPrimary file:text-white hover:file:bg-warmPrimaryDark cursor-pointer"/>
+            </div>
+            <!-- Image URL -->
+            <div>
+              <span class="text-xs text-stone-500 block mb-1">🔗 웹 이미지 주소(URL) 입력:</span>
+              <input type="url" id="formImageUrl" placeholder="https://example.com/image.jpg" oninput="previewImageFromUrl()" class="w-full px-3 py-1.5 text-xs border border-stone-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-warmPrimary"/>
+            </div>
+          </div>
+          <!-- Preview Box -->
+          <div class="mt-2 flex items-center gap-3 bg-white p-2 rounded-lg border border-stone-200">
+            <div class="w-12 h-16 bg-stone-100 rounded border border-stone-200 overflow-hidden flex items-center justify-center text-xs text-stone-400">
+              <img id="imagePreview" src="" alt="Preview" class="hidden w-full h-full object-cover"/>
+              <span id="previewPlaceholder"><i class="fa-regular fa-image"></i></span>
+            </div>
+            <div class="text-xs text-stone-500">
+              <p class="font-medium text-stone-700">이미지 미리보기</p>
+              <p class="text-[11px] text-stone-400">직접 사진을 선택하거나 인터넷 이미지 URL을 입력하세요.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="space-y-1">
+          <label class="block font-medium text-stone-700">태그 (쉼표로 구분)</label>
+          <input type="text" id="formTags" placeholder="예: #상상력, #구름빵, #따뜻함" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none"/>
+        </div>
+
+        <!-- Summary -->
+        <div class="space-y-1">
+          <label class="block font-medium text-stone-700">한 줄 요약 / 소개 <span class="text-rose-500">*</span></label>
+          <input type="text" id="formSummary" required placeholder="비 오는 날 아침, 구름으로 만든 빵을 먹고 하늘을 나는 신비한 이야기" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none"/>
+        </div>
+
+        <!-- Full Story -->
+        <div class="space-y-1">
+          <label class="block font-medium text-stone-700">상세 정보 및 감상평 (작업실 기록) <span class="text-rose-500">*</span></label>
+          <textarea id="formDescription" rows="4" required placeholder="그림책의 주요 서사, 원화의 화풍, 추천 이유 등 자세한 글을 작성해 주세요." class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-warmPrimary focus:outline-none resize-none"></textarea>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex justify-end gap-2 pt-4 border-t border-stone-200">
+          <button type="button" onclick="closeBookModal()" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg font-medium transition">
+            취소
+          </button>
+          <button type="submit" class="px-5 py-2 bg-warmPrimary hover:bg-warmPrimaryDark text-white rounded-lg font-medium shadow transition">
+            저장하기
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    /* ==========================================================================
+       Initial Mock Data & State Management
+       ========================================================================== */
+    const STORAGE_KEY = 'daily_picturebook_studio_data_v1';
+    const ADMIN_PASSWORD = '0000';
+
+    let isAdminLoggedIn = false;
+    let selectedCategory = 'all';
+    let currentUploadedDataUrl = ''; // Base64 data from file input
+
+    // Default sample data for "매일 그림책 작업실"
+    const defaultBooks = [
+      {
+        id: 'book-1',
+        title: '구름빵',
+        author: '백희나 글/그림',
+        category: '추천 그림책',
+        age: '4~7세',
+        publisher: '한솔수북',
+        tags: '#구름빵 #백희나 #상상력 #가족',
+        summary: '어느 날 아침, 나뭇가지에 걸린 구름을 구워서 만든 달콤한 구름빵 이야기.',
+        description: '어느 날 비 오는 날 아침, 나뭇가지에 걸려 있는 작은 구름을 집으로 가져와 엄마가 오븐에 노릇노릇 굽습니다. 구름빵을 먹은 아이들은 구름처럼 몽실몽실 몸이 두둥실 떠올라 바쁜 아침 콩나물시루 같은 버스 속에 갇힌 아빠에게 날아가 구름빵을 전달합니다.\n\n입체 인형 기법과 섬세한 조명 연출이 돋보이는 대표 한국 그림책으로, 일상 속에 찾아오는 따스한 기적과 가족 사랑을 매력적으로 담아냈습니다.',
+        image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80',
+        createdAt: Date.now() - 3000000
+      },
+      {
+        id: 'book-2',
+        title: '알사탕',
+        author: '백희나 글/그림',
+        category: '어른을 위한 그림책',
+        age: '전연령',
+        publisher: '책읽는곰',
+        tags: '#알사탕 #마음들리기 #감성 #소통',
+        summary: '문방구에서 산 신비한 알사탕을 먹으면 평소 들리지 않던 마음의 소리가 들린다!',
+        description: '혼자 구슬치기를 하던 동동이가 문방구에서 사 온 알사탕. 사탕을 입에 넣자 쇼파의 투덜거림, 늙은 개 구슬이의 진심, 그리고 잔소리꾼 아빠의 "사랑한다"는 마음속 진짜 속마음이 소리로 들려오기 시작합니다.\n\n타인의 마음을 헤아리고 들을 수 있게 되는 마법 같은 경험을 전하며, 아이들뿐만 아니라 어른들에게도 깊은 울림과 눈시울을 붉히게 만드는 수작입니다.',
+        image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80',
+        createdAt: Date.now() - 2500000
+      },
+      {
+        id: 'book-3',
+        title: '어둠을 무서워하는 아이',
+        author: '크리스 해드필드 글',
+        category: '유아/어린이',
+        age: '5~8세',
+        publisher: '지양어린이',
+        tags: '#우주선 #용기 #밤하늘 #상상',
+        summary: '밤이 오는 것이 두려웠던 소년이 진짜 밤하늘과 우주를 만나 용기를 얻는 스토리.',
+        description: '침대 밑 어둠이 무서워 밤마다 잠들지 못하던 크리스. 하지만 우주비행사가 달에 착륙하는 장면을 본 순간, 밤과 어둠이야말로 깊고 광활한 우주를 만나기 위해 반드시 필요한 선물임을 깨닫게 됩니다.\n\n실제 우주비행사의 어린 시절 경험을 바탕으로 쓴 이야기로, 두려움을 호기심과 용기로 바꾸어 주는 따스한 그림이 특징입니다.',
+        image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=600&q=80',
+        createdAt: Date.now() - 2000000
+      },
+      {
+        id: 'book-4',
+        title: '나무를 심은 사람',
+        author: '장 지오노 글 / 프레데릭 백 그림',
+        category: '자연/동물',
+        age: '전연령',
+        publisher: '두레',
+        tags: '#자연 #희망 #나무 #헌신',
+        summary: '황무지 프로방스 산악지대에 혼자 나무를 심어 기적의 숲을 만든 한 노인의 삶.',
+        description: '아무것도 살지 않는 황량한 고원 지대에서 침묵 속에 매일 도토리를 심는 엘제아르 부피에. 수십 년의 세월 동안 묵묵히 이어진 한 사람의 성실한 노력이 바람과 물, 그리고 풍요로운 푸른 숲을 다시 되살려냅니다.\n\n부드럽고 묵직한 수채화 풍경화와 아름다운 문체가 만나 인간과 자연의 조화로운 삶을 일깨워줍니다.',
+        image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+        createdAt: Date.now() - 1500000
+      },
+      {
+        id: 'book-5',
+        title: '당근 유치원',
+        author: '안녕달 글/그림',
+        category: '창작/상상',
+        age: '3~6세',
+        publisher: '창비',
+        tags: '#당근유치원 #안녕달 #유치원 #선생님',
+        summary: '새 유치원이 어색했던 아기 토끼가 곰 선생님의 따스함에 마음을 열어가는 과정.',
+        description: '빨간 털 장갑을 낀 것 같은 아기 토끼는 새로 다니게 된 당근 유치원이 낯설고 무섭습니다. 커다란 덩치의 곰 선생님도 부자연스럽지만, 세심한 보살핌과 따뜻한 눈빛에 아기 토끼는 어느새 선생님이 세상에서 제일 좋아지게 됩니다.\n\n특유의 포근하고 다정한 필선과 입가에 미소를 띠게 만드는 명랑한 서사가 돋보이는 작품입니다.',
+        image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=600&q=80',
+        createdAt: Date.now() - 1000000
+      }
+    ];
+
+    let booksData = [];
+
+    /* ==========================================================================
+       Initialization
+       ========================================================================== */
+    window.onload = function() {
+      loadBooksData();
+      renderCategoryButtons();
+      renderBooks();
+    };
+
+    function loadBooksData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          booksData = JSON.parse(saved);
+        } else {
+          booksData = [...defaultBooks];
+          saveBooksData();
+        }
+      } catch (e) {
+        booksData = [...defaultBooks];
+      }
+    }
+
+    function saveBooksData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(booksData));
+      } catch (e) {
+        console.warn('LocalStorage error:', e);
+      }
+    }
+
+    /* ==========================================================================
+       Category & Search Filtering
+       ========================================================================== */
+    const categories = ['전체', '추천 그림책', '유아/어린이', '어른을 위한 그림책', '자연/동물', '창작/상상'];
+
+    function renderCategoryButtons() {
+      const container = document.getElementById('categoryContainer');
+      container.innerHTML = categories.map((cat, idx) => {
+        const catKey = idx === 0 ? 'all' : cat;
+        const isActive = selectedCategory === catKey;
+        const activeClass = isActive 
+          ? 'bg-warmPrimary text-white shadow-md font-medium' 
+          : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 font-normal';
+        return `
+          <button 
+            onclick="filterCategory('${catKey}')" 
+            class="px-3.5 py-1.5 rounded-full text-xs transition duration-200 ${activeClass}"
+          >
+            ${cat}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function filterCategory(catKey) {
+      selectedCategory = catKey;
+      renderCategoryButtons();
+      
+      const titleElem = document.getElementById('currentCategoryTitle');
+      if (catKey === 'all') {
+        titleElem.textContent = '전체 그림책 서가';
+      } else {
+        titleElem.textContent = `${catKey} 목록`;
+      }
+      
+      renderBooks();
+    }
+
+    function handleSearch() {
+      renderBooks();
+    }
+
+    /* ==========================================================================
+       Render Books Grid
+       ========================================================================== */
+    function renderBooks() {
+      const grid = document.getElementById('bookGrid');
+      const emptyState = document.getElementById('emptyState');
+      const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      let filtered = booksData.filter(book => {
+        // Category check
+        const matchCategory = (selectedCategory === 'all') || (book.category === selectedCategory);
+
+        // Search check
+        const matchSearch = !searchVal || 
+          book.title.toLowerCase().includes(searchVal) || 
+          book.author.toLowerCase().includes(searchVal) || 
+          (book.tags && book.tags.toLowerCase().includes(searchVal)) ||
+          book.summary.toLowerCase().includes(searchVal);
+
+        return matchCategory && matchSearch;
+      });
+
+      // Update badge count
+      document.getElementById('bookCountBadge').textContent = `${filtered.length}권`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      grid.innerHTML = filtered.map(book => {
+        return `
+          <div class="bg-white rounded-2xl overflow-hidden border border-stone-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group relative">
+            
+            <!-- Admin Buttons Overlay -->
+            ${isAdminLoggedIn ? `
+              <div class="absolute top-2 right-2 z-20 flex gap-1 bg-black/60 p-1 rounded-lg backdrop-blur-sm">
+                <button onclick="openEditBookModal('${book.id}', event)" class="w-7 h-7 bg-amber-600 hover:bg-amber-500 text-white rounded flex items-center justify-center text-xs transition" title="수정">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button onclick="deleteBook('${book.id}', event)" class="w-7 h-7 bg-rose-600 hover:bg-rose-500 text-white rounded flex items-center justify-center text-xs transition" title="삭제">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            ` : ''}
+
+            <!-- Card Image Box -->
+            <div onclick="openDetailModal('${book.id}')" class="cursor-pointer overflow-hidden bg-stone-100 relative">
+              <img 
+                src="${book.image}" 
+                alt="${escapeHtml(book.title)}" 
+                class="w-full img-aspect object-cover group-hover:scale-105 transition duration-500"
+                onerror="this.src='https://placehold.co/400x530/f4efe6/8c6d58?text=${encodeURIComponent(book.title)}'"
+              />
+              <span class="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded backdrop-blur-sm font-light">
+                ${escapeHtml(book.category)}
+              </span>
+            </div>
+
+            <!-- Card Content -->
+            <div onclick="openDetailModal('${book.id}')" class="p-4 flex-1 flex flex-col justify-between cursor-pointer space-y-2">
+              <div>
+                <h4 class="font-bold text-stone-900 font-batang text-base group-hover:text-warmAccent transition line-clamp-1">
+                  ${escapeHtml(book.title)}
+                </h4>
+                <p class="text-xs text-warmPrimary font-medium mt-0.5 line-clamp-1">
+                  ${escapeHtml(book.author)}
+                </p>
+                <p class="text-xs text-stone-600 mt-2 line-clamp-2 leading-relaxed">
+                  ${escapeHtml(book.summary)}
+                </p>
+              </div>
+
+              <div class="pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400">
+                <span class="truncate max-w-[120px]">${escapeHtml(book.tags || '#그림책')}</span>
+                <span class="text-warmAccent font-medium">자세히 보기 <i class="fa-solid fa-angle-right text-[9px]"></i></span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==========================================================================
+       Detail Modal Logic
+       ========================================================================== */
+    function openDetailModal(id) {
+      const book = booksData.find(b => b.id === id);
+      if (!book) return;
+
+      document.getElementById('modalCategory').textContent = book.category || '그림책';
+      document.getElementById('modalTitle').textContent = book.title;
+      document.getElementById('modalAuthor').textContent = book.author;
+      document.getElementById('modalAge').textContent = book.age || '전연령';
+      document.getElementById('modalPublisher').textContent = book.publisher || '작업실 소장 도서';
+      document.getElementById('modalTags').textContent = book.tags || '#그림책';
+      document.getElementById('modalSummary').textContent = book.summary;
+      document.getElementById('modalDescription').textContent = book.description;
+      
+      const coverImg = document.getElementById('modalCover');
+      coverImg.src = book.image;
+      coverImg.onerror = function() {
+        this.src = `https://placehold.co/400x530/f4efe6/8c6d58?text=${encodeURIComponent(book.title)}`;
+      };
+
+      document.getElementById('detailModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    /* ==========================================================================
+       Admin Authorization & Hidden Password Logic
+       ========================================================================== */
+    function toggleAdminAccess() {
+      if (isAdminLoggedIn) {
+        showToast('이미 관리자 모드로 로그인되어 있습니다.', 'info');
+      } else {
+        document.getElementById('adminAuthError').classList.add('hidden');
+        document.getElementById('adminPasswordInput').value = '';
+        document.getElementById('adminAuthModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+      }
+    }
+
+    function closeAdminAuthModal() {
+      document.getElementById('adminAuthModal').classList.add('hidden');
+    }
+
+    function submitAdminAuth() {
+      const inputPass = document.getElementById('adminPasswordInput').value;
+      if (inputPass === ADMIN_PASSWORD) {
+        isAdminLoggedIn = true;
+        closeAdminAuthModal();
+        document.getElementById('adminBanner').classList.remove('hidden');
+        renderBooks();
+        showToast('관리자로 모드로 변경되었습니다. (비밀번호: 0000 인증 완료)', 'success');
+      } else {
+        document.getElementById('adminAuthError').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdminLoggedIn = false;
+      document.getElementById('adminBanner').classList.add('hidden');
+      renderBooks();
+      showToast('관리자 모드에서 로그아웃 하였습니다.', 'info');
+    }
+
+    /* ==========================================================================
+       Book Modal (Add / Edit / File Preview)
+       ========================================================================== */
+    function openBookModal() {
+      if (!isAdminLoggedIn) {
+        toggleAdminAccess();
+        return;
+      }
+      document.getElementById('bookForm').reset();
+      document.getElementById('editBookId').value = '';
+      document.getElementById('bookModalTitle').innerHTML = `<i class="fa-solid fa-plus text-warmAccent"></i> 새 그림책 등록`;
+      
+      currentUploadedDataUrl = '';
+      hideImagePreview();
+
+      document.getElementById('bookModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function openEditBookModal(id, e) {
+      if (e) e.stopPropagation();
+      const book = booksData.find(b => b.id === id);
+      if (!book) return;
+
+      document.getElementById('editBookId').value = book.id;
+      document.getElementById('formTitle').value = book.title;
+      document.getElementById('formAuthor').value = book.author;
+      document.getElementById('formCategory').value = book.category || '추천 그림책';
+      document.getElementById('formAge').value = book.age || '';
+      document.getElementById('formPublisher').value = book.publisher || '';
+      document.getElementById('formTags').value = book.tags || '';
+      document.getElementById('formSummary').value = book.summary || '';
+      document.getElementById('formDescription').value = book.description || '';
+      document.getElementById('formImageUrl').value = book.image || '';
+
+      document.getElementById('bookModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-warmAccent"></i> 그림책 정보 수정`;
+
+      currentUploadedDataUrl = '';
+      if (book.image) {
+        showImagePreview(book.image);
+      } else {
+        hideImagePreview();
+      }
+
+      document.getElementById('bookModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeBookModal() {
+      document.getElementById('bookModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Handle Local Image File Upload via FileReader API
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        currentUploadedDataUrl = e.target.result;
+        document.getElementById('formImageUrl').value = ''; // clear url input if local file chosen
+        showImagePreview(currentUploadedDataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function previewImageFromUrl() {
+      const url = document.getElementById('formImageUrl').value.trim();
+      currentUploadedDataUrl = '';
+      if (url) {
+        showImagePreview(url);
+      } else {
+        hideImagePreview();
+      }
+    }
+
+    function showImagePreview(src) {
+      const img = document.getElementById('imagePreview');
+      const placeholder = document.getElementById('previewPlaceholder');
+      img.src = src;
+      img.classList.remove('hidden');
+      placeholder.classList.add('hidden');
+    }
+
+    function hideImagePreview() {
+      const img = document.getElementById('imagePreview');
+      const placeholder = document.getElementById('previewPlaceholder');
+      img.src = '';
+      img.classList.add('hidden');
+      placeholder.classList.remove('hidden');
+    }
+
+    function handleBookSubmit(event) {
+      event.preventDefault();
+
+      const editId = document.getElementById('editBookId').value;
+      const title = document.getElementById('formTitle').value.trim();
+      const author = document.getElementById('formAuthor').value.trim();
+      const category = document.getElementById('formCategory').value;
+      const age = document.getElementById('formAge').value.trim() || '전연령';
+      const publisher = document.getElementById('formPublisher').value.trim() || '작업실 소장';
+      const tags = document.getElementById('formTags').value.trim() || '#그림책';
+      const summary = document.getElementById('formSummary').value.trim();
+      const description = document.getElementById('formDescription').value.trim();
+      
+      const imageUrlInput = document.getElementById('formImageUrl').value.trim();
+      
+      // Determine final image source (Uploaded File > URL > Default Placeholder)
+      let finalImage = currentUploadedDataUrl || imageUrlInput || 'https://placehold.co/400x530/f4efe6/8c6d58?text=Picturebook';
+
+      if (editId) {
+        // Edit Existing
+        const idx = booksData.findIndex(b => b.id === editId);
+        if (idx !== -1) {
+          booksData[idx] = {
+            ...booksData[idx],
+            title,
+            author,
+            category,
+            age,
+            publisher,
+            tags,
+            summary,
+            description,
+            image: finalImage,
+            updatedAt: Date.now()
+          };
+          showToast('그림책 정보가 수정되었습니다.', 'success');
+        }
+      } else {
+        // Add New
+        const newBook = {
+          id: 'book-' + Date.now(),
+          title,
+          author,
+          category,
+          age,
+          publisher,
+          tags,
+          summary,
+          description,
+          image: finalImage,
+          createdAt: Date.now()
+        };
+        booksData.unshift(newBook);
+        showToast('새 그림책이 성공적으로 등록되었습니다!', 'success');
+      }
+
+      saveBooksData();
+      renderBooks();
+      closeBookModal();
+    }
+
+    function deleteBook(id, e) {
+      if (e) e.stopPropagation();
+      
+      const book = booksData.find(b => b.id === id);
+      if (!book) return;
+
+      // Custom inline confirm instead of browser window.confirm
+      showToastConfirm(`'${book.title}' 그림책을 삭제하시겠습니까?`, () => {
+        booksData = booksData.filter(b => b.id !== id);
+        saveBooksData();
+        renderBooks();
+        showToast('그림책이 삭제되었습니다.', 'info');
+      });
+    }
+
+    /* ==========================================================================
+       Utilities & Custom Toast Notifications
+       ========================================================================== */
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`이메일 주소(${text})가 복사되었습니다!`, 'success');
+        }).catch(() => {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const dummy = document.createElement('textarea');
+      document.body.appendChild(dummy);
+      dummy.value = text;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+      showToast(`이메일 주소(${text})가 복사되었습니다!`, 'success');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let bgClass = 'bg-stone-800 text-white';
+      let icon = 'fa-info-circle text-amber-400';
+
+      if (type === 'success') {
+        bgClass = 'bg-emerald-900 text-emerald-100 border border-emerald-700';
+        icon = 'fa-circle-check text-emerald-400';
+      } else if (type === 'error') {
+        bgClass = 'bg-rose-900 text-rose-100 border border-rose-700';
+        icon = 'fa-circle-exclamation text-rose-400';
+      }
+
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-xl ${bgClass} text-xs sm:text-sm flex items-center gap-3 transform transition-all duration-300 translate-y-4 opacity-0 max-w-sm`;
+      toast.innerHTML = `
+        <i class="fa-solid ${icon} text-base flex-shrink-0"></i>
+        <span class="flex-1">${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-4', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function showToastConfirm(message, onConfirm) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      toast.className = `pointer-events-auto p-4 rounded-xl shadow-2xl bg-stone-900 border border-stone-700 text-stone-100 text-xs sm:text-sm flex flex-col gap-3 transform transition-all duration-300 translate-y-4 opacity-0 max-w-xs`;
+      toast.innerHTML = `
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-circle-question text-warmAccent text-base"></i>
+          <span class="font-medium">${message}</span>
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button id="toastCancelBtn" class="px-3 py-1 bg-stone-700 hover:bg-stone-600 rounded text-xs">취소</button>
+          <button id="toastOkBtn" class="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-xs font-medium">삭제하기</button>
+        </div>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-4', 'opacity-0');
+      }, 10);
+
+      toast.querySelector('#toastCancelBtn').onclick = () => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      };
+
+      toast.querySelector('#toastOkBtn').onclick = () => {
+        onConfirm();
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      };
+    }
+  </script>
+</body>
+</html>
